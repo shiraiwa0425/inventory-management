@@ -6,8 +6,8 @@ import Link from "next/link";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "在庫管理システム",
-  description: "Next.jsとPostgreSQLを使用した在庫管理システム",
+  title: "仕入管理システム",
+  description: "Next.jsとPostgreSQLを使用した仕入管理システム",
 };
 
 export default function RootLayout({
@@ -24,7 +24,7 @@ export default function RootLayout({
               <div className="flex justify-between h-16">
                 <div className="flex">
                   <div className="flex-shrink-0 flex items-center">
-                    <h1 className="text-xl font-bold">在庫管理システム</h1>
+                    <h1 className="text-xl font-bold">仕入管理システム</h1>
                   </div>
                   <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                     <Link
@@ -37,7 +37,7 @@ export default function RootLayout({
                       href="/products"
                       className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                     >
-                      製品管理
+                      仕入管理
                     </Link>
                   </div>
                 </div>

@@ -13,22 +13,70 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id            Int            @id @default(autoincrement())
+  username      String         @unique
+  passwordHash  String
+  name          String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Vendor {
+  id            Int            @id @default(autoincrement())
+  name          String
+  address       String
+  contact       String
+  taxId         String
+  purchases     PurchaseData[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model PurchaseData {
+  id            Int            @id @default(autoincrement())
+  vendor        Vendor         @relation(fields: [vendorId], references: [id])
+  vendorId      Int
+  purchaseDate  DateTime
+  totalAmount   Float
+  taxAmount     Float
+  status        String         @default("pending") // pending, completed, cancelled
+  notes         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model PurchaseOrder {
+  id          Int      @id @default(autoincrement())
+  orderNumber String   @unique
+  supplier    String
+  orderDate   DateTime
+  status      String   @default("pending") // pending, received, cancelled
+  items       PurchaseOrderItem[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PurchaseOrderItem {
+  id             Int           @id @default(autoincrement())
+  purchaseOrder  PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  purchaseOrderId Int
+  productName    String
+  quantity       Int
+  unitPrice      Float
+  totalPrice     Float
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
 model Product {
   id          Int      @id @default(autoincrement())
   name        String
   description String?
   price       Float
   quantity    Int      @default(0)
+  category    String?
+  location    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-}
-
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  name      String
-  role      String   @default("user")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
