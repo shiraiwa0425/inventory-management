@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 interface InventoryItem {
@@ -18,7 +17,6 @@ interface InventoryItem {
 }
 
 export default function InventoryDetailPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
   const [item, setItem] = useState<InventoryItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
