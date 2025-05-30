@@ -56,7 +56,7 @@ export default function DataTable<T extends Record<string, unknown>>({
                   >
                     {column.render 
                       ? column.render(item)
-                      : item[column.key as keyof T]
+                      : String(item[column.key as keyof T] ?? '')
                     }
                   </td>
                 ))}
