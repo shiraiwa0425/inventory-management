@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface UseApiOptions {
   immediate?: boolean;
@@ -20,7 +20,7 @@ export function useApi<T>(
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const execute = async () => {
+  const execute = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -31,7 +31,7 @@ export function useApi<T>(
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiCall]);
 
   const reset = () => {
     setData(null);
@@ -43,7 +43,7 @@ export function useApi<T>(
     if (options.immediate) {
       execute();
     }
-  }, []);
+  }, [execute, options.immediate]);
 
   return { data, loading, error, execute, reset };
 }
