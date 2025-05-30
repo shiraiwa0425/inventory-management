@@ -1,9 +1,8 @@
-import { PrismaClient } from '@prisma/client';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/db';
+import { createErrorResponse, createSuccessResponse, ApiError } from '@/lib/api-response';
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 // ログイン
@@ -12,10 +11,7 @@ export async function POST(request: NextRequest) {
     const { username, password } = await request.json();
 
     if (!username || !password) {
-      return NextResponse.json(
-        { error: 'ユーザー名とパスワードが必要です' },
-        { status: 400 }
-      );
+      throw new ApiError('ユーザー名とパスワードが必要です', 400);
     }
 
     const user = await prisma.user.findUnique({
@@ -23,19 +19,13 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'ユーザー名またはパスワードが正しくありません' },
-        { status: 401 }
-      );
+      throw new ApiError('ユーザー名またはパスワードが正しくありません', 401);
     }
 
     const isValidPassword = await bcrypt.compare(password, user.passwordHash);
 
     if (!isValidPassword) {
-      return NextResponse.json(
-        { error: 'ユーザー名またはパスワードが正しくありません' },
-        { status: 401 }
-      );
+      throw new ApiError('ユーザー名またはパスワードが正しくありません', 401);
     }
 
     const token = sign(
@@ -44,7 +34,7 @@ export async function POST(request: NextRequest) {
       { expiresIn: '1d' }
     );
 
-    return NextResponse.json({
+    return createSuccessResponse({
       token,
       user: {
         id: user.id,
@@ -53,10 +43,6 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error during login:', error);
-    return NextResponse.json(
-      { error: 'ログイン中にエラーが発生しました' },
-      { status: 500 }
-    );
+    return createErrorResponse(error, 'ログイン中にエラーが発生しました');
   }
 } 

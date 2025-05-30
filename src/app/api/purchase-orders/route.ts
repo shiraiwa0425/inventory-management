@@ -1,7 +1,6 @@
-import { PrismaClient } from '@prisma/client';
-import { NextRequest, NextResponse } from 'next/server';
-
-const prisma = new PrismaClient();
+import { NextRequest } from 'next/server';
+import { prisma } from '@/lib/db';
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-response';
 
 // 全仕入伝票を取得
 export async function GET() {
@@ -14,10 +13,9 @@ export async function GET() {
         orderDate: 'desc',
       },
     });
-    return NextResponse.json(purchaseOrders);
-  } catch (error: unknown) {
-    console.error('仕入伝票の取得中にエラーが発生しました:', error);
-    return NextResponse.json({ error: 'エラーが発生しました' }, { status: 500 });
+    return createSuccessResponse(purchaseOrders);
+  } catch (error) {
+    return createErrorResponse(error, '仕入伝票の取得に失敗しました');
   }
 }
 
@@ -46,9 +44,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(purchaseOrder, { status: 201 });
-  } catch (error: unknown) {
-    console.error('仕入伝票の作成中にエラーが発生しました:', error);
-    return NextResponse.json({ error: '仕入伝票の作成に失敗しました' }, { status: 500 });
+    return createSuccessResponse(purchaseOrder, 201);
+  } catch (error) {
+    return createErrorResponse(error, '仕入伝票の作成に失敗しました');
   }
 } 
