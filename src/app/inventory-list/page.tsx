@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface InventoryItem {
   id: number;
@@ -21,14 +21,14 @@ export default function InventoryListPage() {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await fetch('/api/inventory');
+        const response = await fetch("/api/inventory");
         if (!response.ok) {
-          throw new Error('在庫データの取得に失敗しました');
+          throw new Error("在庫データの取得に失敗しました");
         }
         const data = await response.json();
         setItems(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'エラーが発生しました');
+        setError(err instanceof Error ? err.message : "エラーが発生しました");
       } finally {
         setLoading(false);
       }
@@ -38,27 +38,33 @@ export default function InventoryListPage() {
   }, []);
 
   const handleDelete = async (id: number) => {
-    if (!confirm('本当に削除しますか？')) {
+    if (!confirm("本当に削除しますか？?")) {
       return;
     }
 
     try {
       const response = await fetch(`/api/inventory/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error('削除に失敗しました');
+        throw new Error("削除に失敗しました");
       }
 
       setItems(items.filter((item) => item.id !== id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : '削除中にエラーが発生しました');
+      setError(
+        err instanceof Error ? err.message : "削除中にエラーが発生しました"
+      );
     }
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">読み込み中...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        読み込み中...
+      </div>
+    );
   }
 
   if (error) {
@@ -120,10 +126,10 @@ export default function InventoryListPage() {
                   <span
                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       item.quantity <= 0
-                        ? 'bg-red-100 text-red-800'
+                        ? "bg-red-100 text-red-800"
                         : item.quantity <= 10
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-green-100 text-green-800'
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-green-100 text-green-800"
                     }`}
                   >
                     {item.quantity}個
@@ -157,4 +163,4 @@ export default function InventoryListPage() {
       </div>
     </div>
   );
-} 
+}
