@@ -1,7 +1,5 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/db';
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-response';
 
 export async function GET() {
   try {
@@ -11,12 +9,8 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(products);
+    return createSuccessResponse(products);
   } catch (error) {
-    console.error('Error fetching products:', error);
-    return NextResponse.json(
-      { error: '製品データの取得に失敗しました' },
-      { status: 500 }
-    );
+    return createErrorResponse(error, '製品データの取得に失敗しました');
   }
 } 

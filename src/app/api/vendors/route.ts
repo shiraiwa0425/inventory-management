@@ -1,7 +1,6 @@
-import { PrismaClient } from '@prisma/client';
-import { NextRequest, NextResponse } from 'next/server';
-
-const prisma = new PrismaClient();
+import { NextRequest } from 'next/server';
+import { prisma } from '@/lib/db';
+import { createErrorResponse, createSuccessResponse, ApiError } from '@/lib/api-response';
 
 // 仕入先一覧の取得
 export async function GET() {
@@ -11,13 +10,9 @@ export async function GET() {
         name: 'asc',
       },
     });
-    return NextResponse.json(vendors);
+    return createSuccessResponse(vendors);
   } catch (error) {
-    console.error('Error fetching vendors:', error);
-    return NextResponse.json(
-      { error: '仕入先の取得に失敗しました' },
-      { status: 500 }
-    );
+    return createErrorResponse(error, '仕入先の取得に失敗しました');
   }
 }
 
@@ -28,10 +23,7 @@ export async function POST(request: NextRequest) {
     const { name, address, contact, taxId } = body;
 
     if (!name || !address || !contact || !taxId) {
-      return NextResponse.json(
-        { error: '必要な情報が不足しています' },
-        { status: 400 }
-      );
+      throw new ApiError('必要な情報が不足しています', 400);
     }
 
     const vendor = await prisma.vendor.create({
@@ -43,12 +35,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(vendor, { status: 201 });
+    return createSuccessResponse(vendor, 201);
   } catch (error) {
-    console.error('Error creating vendor:', error);
-    return NextResponse.json(
-      { error: '仕入先の作成に失敗しました' },
-      { status: 500 }
-    );
+    return createErrorResponse(error, '仕入先の作成に失敗しました');
   }
 } 

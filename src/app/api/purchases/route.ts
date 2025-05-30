@@ -1,7 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { NextRequest } from 'next/server';
+import { prisma } from '@/lib/db';
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-response';
 
 export async function GET() {
   try {
@@ -14,13 +13,9 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(purchases);
+    return createSuccessResponse(purchases);
   } catch (error) {
-    console.error('Error fetching purchases:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch purchases' },
-      { status: 500 }
-    );
+    return createErrorResponse(error, '仕入データの取得に失敗しました');
   }
 }
 
@@ -43,12 +38,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(purchase);
+    return createSuccessResponse(purchase, 201);
   } catch (error) {
-    console.error('Error creating purchase:', error);
-    return NextResponse.json(
-      { error: 'Failed to create purchase' },
-      { status: 500 }
-    );
+    return createErrorResponse(error, '仕入データの作成に失敗しました');
   }
 }

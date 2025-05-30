@@ -1,72 +1,79 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-
-type Vendor = {
-  id: number;
-  name: string;
-  address: string;
-  contact: string;
-  taxId: string;
-  createdAt: string;
-  updatedAt: string;
-};
+import { Vendor } from '@/lib/types';
+import { useApi } from '@/hooks/useApi';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import ErrorAlert from '@/components/ui/ErrorAlert';
+import DataTable from '@/components/ui/DataTable';
 
 export default function VendorsPage() {
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchVendors = async () => {
-      try {
-        const response = await fetch('/api/vendors');
-        if (!response.ok) {
-          throw new Error('仕入先データの取得に失敗しました');
-        }
-        const data = await response.json();
-        setVendors(data);
-        setLoading(false);
-      } catch (error) {
-        setError('仕入先データの取得中にエラーが発生しました');
-        setLoading(false);
-        console.error('Error fetching vendors:', error);
-      }
-    };
-
-    fetchVendors();
-  }, []);
+  const { data: vendors, loading, error } = useApi<Vendor[]>(async () => {
+    const response = await fetch('/api/vendors');
+    if (!response.ok) {
+      throw new Error('仕入先データの取得に失敗しました');
+    }
+    return response.json();
+  });
 
   if (loading) {
-    return (
-      <div className="text-center py-10">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
-          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-            Loading...
-          </span>
-        </div>
-        <p className="mt-2 text-gray-600">読み込み中...</p>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
-    return (
-      <div className="bg-red-50 p-4 rounded-md">
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <div className="ml-3">
-            <h3 className="text-sm font-medium text-red-800">{error}</h3>
-          </div>
-        </div>
-      </div>
-    );
+    return <ErrorAlert message={error} />;
   }
+
+  const columns = [
+    {
+      key: 'name',
+      header: '仕入先名',
+      render: (vendor: Vendor) => (
+        <div className="font-medium text-gray-900">{vendor.name}</div>
+      )
+    },
+    {
+      key: 'address',
+      header: '住所',
+      render: (vendor: Vendor) => (
+        <div className="text-sm text-gray-900">{vendor.address}</div>
+      )
+    },
+    {
+      key: 'contact',
+      header: '連絡先',
+      className: 'whitespace-nowrap',
+      render: (vendor: Vendor) => (
+        <div className="text-sm text-gray-900">{vendor.contact}</div>
+      )
+    },
+    {
+      key: 'taxId',
+      header: '税番号',
+      className: 'whitespace-nowrap',
+      render: (vendor: Vendor) => (
+        <div className="text-sm text-gray-900">{vendor.taxId}</div>
+      )
+    },
+    {
+      key: 'actions',
+      header: '',
+      className: 'relative',
+      render: (vendor: Vendor) => (
+        <div className="whitespace-nowrap text-right text-sm font-medium">
+          <Link
+            href={`/vendors/${vendor.id}`}
+            className="text-indigo-600 hover:text-indigo-900 mr-4"
+          >
+            詳細
+          </Link>
+          <button className="text-red-600 hover:text-red-900">
+            削除
+          </button>
+        </div>
+      )
+    }
+  ];
 
   return (
     <div className="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -89,66 +96,11 @@ export default function VendorsPage() {
         </div>
       </div>
       <div className="border-t border-gray-200">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  仕入先名
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  住所
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  連絡先
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  税番号
-                </th>
-                <th scope="col" className="relative px-6 py-3">
-                  <span className="sr-only">編集</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {vendors.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
-                    仕入先がありません。新しい仕入先を作成してください。
-                  </td>
-                </tr>
-              ) : (
-                vendors.map((vendor) => (
-                  <tr key={vendor.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-gray-900">{vendor.name}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{vendor.address}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{vendor.contact}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{vendor.taxId}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link
-                        href={`/vendors/${vendor.id}`}
-                        className="text-indigo-600 hover:text-indigo-900 mr-4"
-                      >
-                        詳細
-                      </Link>
-                      <button className="text-red-600 hover:text-red-900">
-                        削除
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          data={vendors || []}
+          columns={columns}
+          emptyMessage="仕入先がありません。新しい仕入先を作成してください。"
+        />
       </div>
     </div>
   );
