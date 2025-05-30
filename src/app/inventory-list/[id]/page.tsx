@@ -16,15 +16,26 @@ interface InventoryItem {
   supplier: string;
 }
 
-export default function InventoryDetailPage({ params }: { params: { id: string } }) {
+export default function InventoryDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const [item, setItem] = useState<InventoryItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [resolvedParams, setResolvedParams] = useState<{ id: string } | null>(null);
 
   useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setResolvedParams(resolvedParams);
+    };
+    resolveParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (!resolvedParams) return;
+
     const fetchItem = async () => {
       try {
-        const response = await fetch(`/api/inventory/${params.id}`);
+        const response = await fetch(`/api/inventory/${resolvedParams.id}`);
         if (!response.ok) {
           throw new Error('在庫データの取得に失敗しました');
         }
@@ -38,7 +49,7 @@ export default function InventoryDetailPage({ params }: { params: { id: string }
     };
 
     fetchItem();
-  }, [params.id]);
+  }, [resolvedParams]);
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen">読み込み中...</div>;
@@ -58,7 +69,7 @@ export default function InventoryDetailPage({ params }: { params: { id: string }
         <h1 className="text-2xl font-bold">在庫詳細</h1>
         <div className="space-x-4">
           <Link
-            href={`/inventory-list/${params.id}/edit`}
+            href={`/inventory-list/${resolvedParams?.id}/edit`}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           >
             編集
